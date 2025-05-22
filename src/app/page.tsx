@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { College, CollegeFormData } from '../types/college';
+import { College, CollegeFormData, AdmissionStatus } from '../types/college';
 import { getColleges, addCollege, updateCollege, deleteCollege } from '../utils/storage';
 import { exportToPDF, exportToWord } from '../utils/export';
 import CollegeForm from '../components/CollegeForm';
@@ -11,6 +11,8 @@ import CollegeCard from '../components/CollegeCard';
 type SortOption = 'deadline-asc' | 'deadline-desc' | 'fee-asc' | 'fee-desc';
 type FeeRange = '0-10000' | '10000-20000' | '20000-30000' | '30000-40000' | '40000+';
 
+const ADMISSION_STATUSES: AdmissionStatus[] = ['Need to Apply', 'Applied', 'Admission Received', 'Admission Not Obtained'];
+
 export default function Home() {
   const [colleges, setColleges] = useState<College[]>([]);
   const [showForm, setShowForm] = useState(false);
@@ -18,6 +20,7 @@ export default function Home() {
   const [selectedCountry, setSelectedCountry] = useState<string>('');
   const [feeRange, setFeeRange] = useState<FeeRange | ''>('');
   const [sortBy, setSortBy] = useState<SortOption>('deadline-asc');
+  const [selectedStatus, setSelectedStatus] = useState<AdmissionStatus | ''>('');
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -84,7 +87,8 @@ export default function Home() {
       const matchesCountry = !selectedCountry || college.location.country === selectedCountry;
       const [minFee, maxFee] = getFeeRangeLimits(feeRange as FeeRange);
       const matchesFeeRange = college.tuitionFee >= minFee && college.tuitionFee <= maxFee;
-      return matchesCountry && matchesFeeRange;
+      const matchesStatus = !selectedStatus || college.admissionStatus === selectedStatus;
+      return matchesCountry && matchesFeeRange && matchesStatus;
     })
   );
 
@@ -148,7 +152,7 @@ export default function Home() {
         {/* Filters */}
         <div className="bg-white rounded-xl shadow-sm p-6 mb-8">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">Filter and Sort Colleges</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Select Country</label>
               <select
@@ -177,6 +181,21 @@ export default function Home() {
                 <option value="20000-30000">$20,000 - $30,000</option>
                 <option value="30000-40000">$30,000 - $40,000</option>
                 <option value="40000+">$40,000+</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Admission Status</label>
+              <select
+                value={selectedStatus}
+                onChange={(e) => setSelectedStatus(e.target.value as AdmissionStatus)}
+                className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+              >
+                <option value="">All Statuses</option>
+                {ADMISSION_STATUSES.map((status) => (
+                  <option key={status} value={status}>
+                    {status}
+                  </option>
+                ))}
               </select>
             </div>
             <div>

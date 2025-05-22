@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { College, CollegeFormData, Exam } from '../types/college';
+import { College, CollegeFormData, Exam, AdmissionStatus } from '../types/college';
 
 interface CollegeFormProps {
     initialData?: College;
@@ -8,6 +8,7 @@ interface CollegeFormProps {
 }
 
 const EXAMS: Exam[] = ['IELTS', 'GRE', 'TOEFL', 'Duolingo'];
+const ADMISSION_STATUSES: AdmissionStatus[] = ['Need to Apply', 'Applied', 'Admission Received', 'Admission Not Obtained'];
 
 export default function CollegeForm({ initialData, onSubmit, onCancel }: CollegeFormProps) {
     const [formData, setFormData] = useState<CollegeFormData>({
@@ -22,6 +23,7 @@ export default function CollegeForm({ initialData, onSubmit, onCancel }: College
         applicationDeadline: '',
         requiredExams: [],
         description: '',
+        admissionStatus: 'Need to Apply',
     });
 
     useEffect(() => {
@@ -145,6 +147,21 @@ export default function CollegeForm({ initialData, onSubmit, onCancel }: College
                         onChange={(e) => setFormData({ ...formData, applicationDeadline: e.target.value })}
                         className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                     />
+                </div>
+
+                <div>
+                    <label className="block text-sm font-medium text-gray-700">Admission Status</label>
+                    <select
+                        value={formData.admissionStatus}
+                        onChange={(e) => setFormData({ ...formData, admissionStatus: e.target.value as AdmissionStatus })}
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                    >
+                        {ADMISSION_STATUSES.map((status) => (
+                            <option key={status} value={status}>
+                                {status}
+                            </option>
+                        ))}
+                    </select>
                 </div>
 
                 <div className="sm:col-span-2">

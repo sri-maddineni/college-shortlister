@@ -7,6 +7,21 @@ interface CollegeCardProps {
     onDelete: (id: string) => void;
 }
 
+const getStatusColor = (status: College['admissionStatus']) => {
+    switch (status) {
+        case 'Need to Apply':
+            return 'bg-yellow-100 text-yellow-800';
+        case 'Applied':
+            return 'bg-blue-100 text-blue-800';
+        case 'Admission Received':
+            return 'bg-green-100 text-green-800';
+        case 'Admission Not Obtained':
+            return 'bg-red-100 text-red-800';
+        default:
+            return 'bg-gray-100 text-gray-800';
+    }
+};
+
 export default function CollegeCard({ college, onEdit, onDelete }: CollegeCardProps) {
     return (
         <div className="bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-200 transform hover:-translate-y-1">
@@ -22,6 +37,9 @@ export default function CollegeCard({ college, onEdit, onDelete }: CollegeCardPr
                         <p className="mt-1 text-sm text-gray-500">
                             {college.location.city}, {college.location.country}
                         </p>
+                        <span className={`mt-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(college.admissionStatus)}`}>
+                            {college.admissionStatus}
+                        </span>
                     </div>
                     <div className="flex space-x-2">
                         <button
