@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { College, CollegeFormData, Exam, ExamScore } from '../types/college';
+import { College, CollegeFormData, Exam } from '../types/college';
 
 interface CollegeFormProps {
     initialData?: College;

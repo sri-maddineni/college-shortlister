@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { College, CollegeFormData, Exam } from '../types/college';
+import { College, CollegeFormData } from '../types/college';
 import { getColleges, addCollege, updateCollege, deleteCollege } from '../utils/storage';
 import { exportToPDF, exportToWord } from '../utils/export';
 import CollegeForm from '../components/CollegeForm';
