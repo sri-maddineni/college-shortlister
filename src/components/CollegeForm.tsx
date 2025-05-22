@@ -26,7 +26,7 @@ export default function CollegeForm({ initialData, onSubmit, onCancel }: College
 
     useEffect(() => {
         if (initialData) {
-            const { id, ...data } = initialData;
+            const { ...data } = initialData;
             setFormData(data);
         }
     }, [initialData]);

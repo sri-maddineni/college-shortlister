@@ -15,4 +15,4 @@ export interface College {
     description?: string;
 }
 
-export interface CollegeFormData extends Omit<College, 'id'> { } 
+export type CollegeFormData = Omit<College, 'id'>; 
