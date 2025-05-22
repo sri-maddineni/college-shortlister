@@ -8,12 +8,16 @@ import { exportToPDF, exportToWord } from '../utils/export';
 import CollegeForm from '../components/CollegeForm';
 import CollegeCard from '../components/CollegeCard';
 
+type SortOption = 'deadline-asc' | 'deadline-desc' | 'fee-asc' | 'fee-desc';
+type FeeRange = '0-10000' | '10000-20000' | '20000-30000' | '30000-40000' | '40000+';
+
 export default function Home() {
   const [colleges, setColleges] = useState<College[]>([]);
   const [showForm, setShowForm] = useState(false);
-  const [editingCollege, setEditingCollege] = useState<College | undefined>();
-  const [filterExam, setFilterExam] = useState<Exam | ''>('');
-  const [filterLocation, setFilterLocation] = useState<string>('');
+  const [editingCollege, setEditingCollege] = useState<College | undefined>(undefined);
+  const [selectedCountry, setSelectedCountry] = useState<string>('');
+  const [feeRange, setFeeRange] = useState<FeeRange | ''>('');
+  const [sortBy, setSortBy] = useState<SortOption>('deadline-asc');
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -47,21 +51,52 @@ export default function Home() {
     }
   };
 
+  const getFeeRangeLimits = (range: FeeRange): [number, number] => {
+    switch (range) {
+      case '0-10000': return [0, 10000];
+      case '10000-20000': return [10000, 20000];
+      case '20000-30000': return [20000, 30000];
+      case '30000-40000': return [30000, 40000];
+      case '40000+': return [40000, Infinity];
+      default: return [0, Infinity];
+    }
+  };
+
+  const sortColleges = (colleges: College[]): College[] => {
+    return [...colleges].sort((a, b) => {
+      switch (sortBy) {
+        case 'deadline-asc':
+          return new Date(a.applicationDeadline).getTime() - new Date(b.applicationDeadline).getTime();
+        case 'deadline-desc':
+          return new Date(b.applicationDeadline).getTime() - new Date(a.applicationDeadline).getTime();
+        case 'fee-asc':
+          return a.tuitionFee - b.tuitionFee;
+        case 'fee-desc':
+          return b.tuitionFee - a.tuitionFee;
+        default:
+          return 0;
+      }
+    });
+  };
+
+  const filteredAndSortedColleges = sortColleges(
+    colleges.filter((college) => {
+      const matchesCountry = !selectedCountry || college.location.country === selectedCountry;
+      const [minFee, maxFee] = getFeeRangeLimits(feeRange as FeeRange);
+      const matchesFeeRange = college.tuitionFee >= minFee && college.tuitionFee <= maxFee;
+      return matchesCountry && matchesFeeRange;
+    })
+  );
+
+  const uniqueCountries = Array.from(new Set(colleges.map(college => college.location.country)));
+
   const handleExportPDF = () => {
-    exportToPDF(filteredColleges);
+    exportToPDF(filteredAndSortedColleges);
   };
 
-  const handleExportWord = async () => {
-    await exportToWord(filteredColleges);
+  const handleExportWord = () => {
+    exportToWord(filteredAndSortedColleges);
   };
-
-  const filteredColleges = colleges.filter((college) => {
-    const matchesExam = !filterExam || college.requiredExams.includes(filterExam);
-    const matchesLocation = !filterLocation ||
-      college.location.city.toLowerCase().includes(filterLocation.toLowerCase()) ||
-      college.location.country.toLowerCase().includes(filterLocation.toLowerCase());
-    return matchesExam && matchesLocation;
-  });
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
@@ -112,38 +147,50 @@ export default function Home() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Filters */}
         <div className="bg-white rounded-xl shadow-sm p-6 mb-8">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Filter Colleges</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">Filter and Sort Colleges</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Filter by Exam</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Select Country</label>
               <select
-                value={filterExam}
-                onChange={(e) => setFilterExam(e.target.value as Exam)}
+                value={selectedCountry}
+                onChange={(e) => setSelectedCountry(e.target.value)}
                 className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
               >
-                <option value="">All Exams</option>
-                <option value="IELTS">IELTS</option>
-                <option value="GRE">GRE</option>
-                <option value="TOEFL">TOEFL</option>
-                <option value="Duolingo">Duolingo</option>
+                <option value="">All Countries</option>
+                {uniqueCountries.map((country) => (
+                  <option key={country} value={country}>
+                    {country}
+                  </option>
+                ))}
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Filter by Location</label>
-              <div className="relative">
-                <input
-                  type="text"
-                  value={filterLocation}
-                  onChange={(e) => setFilterLocation(e.target.value)}
-                  placeholder="Search by city or country"
-                  className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 pl-10"
-                />
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
-                  </svg>
-                </div>
-              </div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Tuition Fee Range</label>
+              <select
+                value={feeRange}
+                onChange={(e) => setFeeRange(e.target.value as FeeRange)}
+                className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+              >
+                <option value="">All Fees</option>
+                <option value="0-10000">$0 - $10,000</option>
+                <option value="10000-20000">$10,000 - $20,000</option>
+                <option value="20000-30000">$20,000 - $30,000</option>
+                <option value="30000-40000">$30,000 - $40,000</option>
+                <option value="40000+">$40,000+</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Sort By</label>
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value as SortOption)}
+                className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+              >
+                <option value="deadline-asc">Deadline (Earliest First)</option>
+                <option value="deadline-desc">Deadline (Latest First)</option>
+                <option value="fee-asc">Fee (Lowest First)</option>
+                <option value="fee-desc">Fee (Highest First)</option>
+              </select>
             </div>
           </div>
         </div>
@@ -155,7 +202,7 @@ export default function Home() {
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {filteredColleges.map((college) => (
+            {filteredAndSortedColleges.map((college) => (
               <CollegeCard
                 key={college.id}
                 college={college}
@@ -166,13 +213,13 @@ export default function Home() {
           </div>
         )}
 
-        {!isLoading && filteredColleges.length === 0 && (
+        {!isLoading && filteredAndSortedColleges.length === 0 && (
           <div className="text-center py-12 bg-white rounded-xl shadow-sm">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 mx-auto text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
             </svg>
             <h3 className="mt-4 text-lg font-medium text-gray-900">No colleges found</h3>
-            <p className="mt-2 text-gray-500">Get started by adding your first college to the list.</p>
+            <p className="mt-2 text-gray-500">Try adjusting your filters or add a new college.</p>
             <button
               onClick={() => {
                 setEditingCollege(undefined);

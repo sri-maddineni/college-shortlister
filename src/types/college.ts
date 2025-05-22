@@ -1,9 +1,14 @@
 export type Exam = 'IELTS' | 'GRE' | 'TOEFL' | 'Duolingo';
 
+export interface ExamScore {
+    exam: Exam;
+    score: number;
+}
+
 export interface College {
     id: string;
-    collegeName: string;
-    universityName: string;
+    institutionName: string;
+    courseName: string;
     location: {
         city: string;
         country: string;
@@ -11,7 +16,7 @@ export interface College {
     tuitionFee: number;
     numberOfSemesters: number;
     applicationDeadline: string;
-    requiredExams: Exam[];
+    requiredExams: ExamScore[];
     description?: string;
 }
 
