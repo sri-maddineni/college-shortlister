@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app';
-import { getFirestore, doc, setDoc, getDoc, getDocs, collection, deleteDoc } from 'firebase/firestore';
+import { getFirestore, collection, doc, setDoc, deleteDoc, query, getDocs } from 'firebase/firestore';
 import { College } from '../types/college';
 
 const firebaseConfig = {

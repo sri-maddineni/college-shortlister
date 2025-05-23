@@ -73,10 +73,7 @@ export default function CollegeForm({ initialData, onSubmit, onCancel }: College
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        onSubmit({
-            ...formData,
-            id: initialData?.id || uuidv4(),
-        });
+        onSubmit(formData);
     };
 
     const getExamScore = (exam: Exam): number => {

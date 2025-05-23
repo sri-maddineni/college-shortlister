@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { College, CollegeFormData, AdmissionStatus } from '../types/college';
+import { College, AdmissionStatus } from '../types/college';
 import { getColleges as getLocalColleges, addCollege as addLocalCollege, updateCollege as updateLocalCollege, deleteCollege as deleteLocalCollege } from '../utils/storage';
-import { getColleges as getFirebaseColleges, addCollege as addFirebaseCollege, updateCollege as updateFirebaseCollege, deleteCollege as deleteFirebaseCollege } from '../utils/firebase';
+import { addCollege as addFirebaseCollege, updateCollege as updateFirebaseCollege, deleteCollege as deleteFirebaseCollege } from '../utils/firebase';
 import { exportToPDF, exportToWord } from '../utils/export';
 import CollegeForm from '../components/CollegeForm';
 import CollegeCard from '../components/CollegeCard';
