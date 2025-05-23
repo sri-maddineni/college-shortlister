@@ -5,9 +5,7 @@ import { jsPDF } from 'jspdf';
 
 export const exportToPDF = (colleges: College[]) => {
     const doc = new jsPDF();
-    const pageWidth = doc.internal.pageSize.getWidth();
     const margin = 20;
-    const contentWidth = pageWidth - (margin * 2);
     let yOffset = margin;
 
     // Title
