@@ -55,15 +55,12 @@ export default function Home() {
     setShowForm(true);
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (college: College) => {
     if (window.confirm('Are you sure you want to delete this college?')) {
       try {
-        const college = colleges.find(c => c.id === id);
-        if (college) {
-          deleteLocalCollege(id);
-          await deleteFirebaseCollege(college);
-          setColleges(getLocalColleges());
-        }
+        deleteLocalCollege(college.id!);
+        await deleteFirebaseCollege(college);
+        setColleges(getLocalColleges());
       } catch (error) {
         console.error('Error deleting college:', error);
         alert('Failed to delete college. Please try again.');

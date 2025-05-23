@@ -1,6 +1,5 @@
-import { useState, useEffect } from 'react';
-import { College, Exam, AdmissionStatus } from '../types/college';
-import { v4 as uuidv4 } from 'uuid';
+import { useState } from 'react';
+import { College, AdmissionStatus } from '../types/college';
 import { getUserData } from '../utils/storage';
 
 interface CollegeFormProps {
@@ -9,66 +8,31 @@ interface CollegeFormProps {
     onCancel: () => void;
 }
 
-const EXAMS: Exam[] = ['IELTS', 'GRE', 'TOEFL', 'Duolingo'];
 const ADMISSION_STATUSES: AdmissionStatus[] = ['Need to Apply', 'Applied', 'Admission Received', 'Admission Not Obtained'];
-
-const MAX_SCORES: Record<Exam, number> = {
-    IELTS: 9,
-    GRE: 340,
-    TOEFL: 120,
-    Duolingo: 160,
-};
 
 export default function CollegeForm({ initialData, onSubmit, onCancel }: CollegeFormProps) {
     const userData = getUserData();
-    const [formData, setFormData] = useState<Omit<College, 'id'>>({
-        institutionName: '',
-        courseName: '',
-        city: '',
+    const [formData, setFormData] = useState<College>({
+        name: '',
         country: '',
+        city: '',
+        program: '',
+        semesters: 4,
         tuitionFee: 0,
-        numberOfSemesters: 4,
         applicationDeadline: '',
-        requiredExams: [],
-        description: '',
         admissionStatus: 'Need to Apply',
+        ieltsScore: 6.5,
         email: userData?.email || '',
         phoneNumber: userData?.phoneNumber || '',
+        ...initialData
     });
 
-    useEffect(() => {
-        if (initialData) {
-            const { id, ...data } = initialData;
-            setFormData(data);
-        }
-    }, [initialData]);
-
-    const handleInputChange = (
-        e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
-    ) => {
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
-        setFormData((prev) => ({
+        setFormData(prev => ({
             ...prev,
-            [name]: name === 'tuitionFee' || name === 'numberOfSemesters' ? Number(value) : value,
+            [name]: name === 'tuitionFee' || name === 'semesters' || name === 'ieltsScore' ? Number(value) : value
         }));
-    };
-
-    const handleExamChange = (exam: Exam, score: number) => {
-        setFormData((prev) => {
-            const existingExamIndex = prev.requiredExams.findIndex((e) => e.exam === exam);
-            const updatedExams = [...prev.requiredExams];
-
-            if (existingExamIndex >= 0) {
-                updatedExams[existingExamIndex] = { exam, score };
-            } else {
-                updatedExams.push({ exam, score });
-            }
-
-            return {
-                ...prev,
-                requiredExams: updatedExams,
-            };
-        });
     };
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -76,101 +40,88 @@ export default function CollegeForm({ initialData, onSubmit, onCancel }: College
         onSubmit(formData);
     };
 
-    const getExamScore = (exam: Exam): number => {
-        const examScore = formData.requiredExams.find((e) => e.exam === exam);
-        return examScore?.score || 0;
-    };
-
     return (
         <form onSubmit={handleSubmit} className="space-y-6">
-            {!userData && (
-                <div className="grid grid-cols-2 gap-4">
-                    <div>
-                        <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                            Email
-                        </label>
-                        <input
-                            type="email"
-                            id="email"
-                            name="email"
-                            value={formData.email}
-                            onChange={handleInputChange}
-                            required
-                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                        />
-                    </div>
-                    <div>
-                        <label htmlFor="phoneNumber" className="block text-sm font-medium text-gray-700">
-                            Phone Number
-                        </label>
-                        <input
-                            type="tel"
-                            id="phoneNumber"
-                            name="phoneNumber"
-                            value={formData.phoneNumber}
-                            onChange={handleInputChange}
-                            required
-                            pattern="[0-9]{10}"
-                            title="Please enter a 10-digit phone number"
-                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                        />
-                    </div>
-                </div>
-            )}
-
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-                <div className="sm:col-span-2">
-                    <label className="block text-sm font-medium text-gray-700">Institution Name</label>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+                        Institution Name
+                    </label>
                     <input
                         type="text"
                         required
-                        value={formData.institutionName}
+                        value={formData.name}
                         onChange={handleInputChange}
-                        name="institutionName"
+                        name="name"
                         placeholder="Enter college or university name"
                         className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                     />
                 </div>
 
-                <div className="sm:col-span-2">
-                    <label className="block text-sm font-medium text-gray-700">Course Name</label>
+                <div>
+                    <label htmlFor="program" className="block text-sm font-medium text-gray-700">
+                        Program Name
+                    </label>
                     <input
                         type="text"
                         required
-                        value={formData.courseName}
+                        value={formData.program}
                         onChange={handleInputChange}
-                        name="courseName"
+                        name="program"
                         placeholder="Enter course name (e.g., Master of Computer Science)"
                         className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                     />
                 </div>
 
                 <div>
-                    <label className="block text-sm font-medium text-gray-700">City</label>
-                    <input
-                        type="text"
-                        required
-                        value={formData.city}
-                        onChange={handleInputChange}
-                        name="city"
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                    />
-                </div>
-
-                <div>
-                    <label className="block text-sm font-medium text-gray-700">Country</label>
+                    <label htmlFor="country" className="block text-sm font-medium text-gray-700">
+                        Country
+                    </label>
                     <input
                         type="text"
                         required
                         value={formData.country}
                         onChange={handleInputChange}
                         name="country"
+                        placeholder="Enter country"
                         className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                     />
                 </div>
 
                 <div>
-                    <label className="block text-sm font-medium text-gray-700">Tuition Fee</label>
+                    <label htmlFor="city" className="block text-sm font-medium text-gray-700">
+                        City
+                    </label>
+                    <input
+                        type="text"
+                        required
+                        value={formData.city}
+                        onChange={handleInputChange}
+                        name="city"
+                        placeholder="Enter city"
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                    />
+                </div>
+
+                <div>
+                    <label htmlFor="semesters" className="block text-sm font-medium text-gray-700">
+                        Number of Semesters
+                    </label>
+                    <input
+                        type="number"
+                        required
+                        min="1"
+                        value={formData.semesters}
+                        onChange={handleInputChange}
+                        name="semesters"
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                    />
+                </div>
+
+                <div>
+                    <label htmlFor="tuitionFee" className="block text-sm font-medium text-gray-700">
+                        Tuition Fee (USD)
+                    </label>
                     <input
                         type="number"
                         required
@@ -178,25 +129,15 @@ export default function CollegeForm({ initialData, onSubmit, onCancel }: College
                         value={formData.tuitionFee}
                         onChange={handleInputChange}
                         name="tuitionFee"
+                        placeholder="Enter tuition fee in USD"
                         className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                     />
                 </div>
 
                 <div>
-                    <label className="block text-sm font-medium text-gray-700">Number of Semesters</label>
-                    <input
-                        type="number"
-                        required
-                        min="1"
-                        value={formData.numberOfSemesters}
-                        onChange={handleInputChange}
-                        name="numberOfSemesters"
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                    />
-                </div>
-
-                <div>
-                    <label className="block text-sm font-medium text-gray-700">Application Deadline</label>
+                    <label htmlFor="applicationDeadline" className="block text-sm font-medium text-gray-700">
+                        Application Deadline
+                    </label>
                     <input
                         type="date"
                         required
@@ -208,10 +149,13 @@ export default function CollegeForm({ initialData, onSubmit, onCancel }: College
                 </div>
 
                 <div>
-                    <label className="block text-sm font-medium text-gray-700">Admission Status</label>
+                    <label htmlFor="admissionStatus" className="block text-sm font-medium text-gray-700">
+                        Admission Status
+                    </label>
                     <select
+                        required
                         value={formData.admissionStatus}
-                        onChange={(e) => setFormData({ ...formData, admissionStatus: e.target.value as AdmissionStatus })}
+                        onChange={handleInputChange}
                         name="admissionStatus"
                         className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                     >
@@ -223,60 +167,69 @@ export default function CollegeForm({ initialData, onSubmit, onCancel }: College
                     </select>
                 </div>
 
-                <div className="sm:col-span-2">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Required Exams and Scores</label>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        {EXAMS.map((exam) => (
-                            <div key={exam} className="flex items-center space-x-4">
-                                <label className="inline-flex items-center">
-                                    <input
-                                        type="checkbox"
-                                        checked={getExamScore(exam) > 0}
-                                        onChange={(e) => handleExamChange(exam, e.target.checked ? 0 : 0)}
-                                        name={`${exam}Score`}
-                                        className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                                    />
-                                    <span className="ml-2">{exam}</span>
-                                </label>
-                                <input
-                                    type="number"
-                                    min="0"
-                                    max={MAX_SCORES[exam]}
-                                    step={exam === 'IELTS' ? 0.5 : 1}
-                                    value={getExamScore(exam)}
-                                    onChange={(e) => handleExamChange(exam, Number(e.target.value))}
-                                    name={`${exam}Score`}
-                                    placeholder="Score"
-                                    className="block w-24 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                                />
-                            </div>
-                        ))}
-                    </div>
+                <div>
+                    <label htmlFor="ieltsScore" className="block text-sm font-medium text-gray-700">
+                        IELTS Score
+                    </label>
+                    <input
+                        type="number"
+                        required
+                        min="0"
+                        max="9"
+                        step="0.5"
+                        value={formData.ieltsScore}
+                        onChange={handleInputChange}
+                        name="ieltsScore"
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                    />
                 </div>
+
+                {!userData && (
+                    <>
+                        <div>
+                            <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                                Email
+                            </label>
+                            <input
+                                type="email"
+                                required
+                                value={formData.email}
+                                onChange={handleInputChange}
+                                name="email"
+                                placeholder="Enter your email"
+                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                            />
+                        </div>
+
+                        <div>
+                            <label htmlFor="phoneNumber" className="block text-sm font-medium text-gray-700">
+                                Phone Number
+                            </label>
+                            <input
+                                type="tel"
+                                required
+                                value={formData.phoneNumber}
+                                onChange={handleInputChange}
+                                name="phoneNumber"
+                                placeholder="Enter your phone number"
+                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                            />
+                        </div>
+                    </>
+                )}
             </div>
 
-            <div>
-                <label className="block text-sm font-medium text-gray-700">Description/Notes</label>
-                <textarea
-                    value={formData.description}
-                    onChange={handleInputChange}
-                    name="description"
-                    rows={3}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                />
-            </div>
-
-            <div className="flex justify-end space-x-3">
+            <div className="flex justify-end gap-3">
                 <button
                     type="button"
                     onClick={onCancel}
-                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                 >
                     Cancel
                 </button>
                 <button
                     type="submit"
-                    className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md hover:bg-indigo-700"
+                    className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                 >
                     {initialData ? 'Update College' : 'Add College'}
                 </button>

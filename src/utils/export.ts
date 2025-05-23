@@ -32,12 +32,16 @@ export const exportToPDF = (colleges: College[]) => {
         // Institution Name
         doc.setFontSize(16);
         doc.setFont('helvetica', 'bold');
-        doc.text(college.institutionName, margin, yOffset);
+        doc.text(college.name, margin, yOffset);
         yOffset += 10;
 
-        // Location
+        // Program
         doc.setFontSize(12);
         doc.setFont('helvetica', 'normal');
+        doc.text(`Program: ${college.program}`, margin, yOffset);
+        yOffset += 8;
+
+        // Location
         doc.text(`Location: ${college.city}, ${college.country}`, margin, yOffset);
         yOffset += 8;
 
@@ -46,24 +50,16 @@ export const exportToPDF = (colleges: College[]) => {
         yOffset += 8;
 
         // Number of Semesters
-        doc.text(`Number of Semesters: ${college.numberOfSemesters}`, margin, yOffset);
+        doc.text(`Number of Semesters: ${college.semesters}`, margin, yOffset);
         yOffset += 8;
 
         // Application Deadline
         doc.text(`Application Deadline: ${new Date(college.applicationDeadline).toLocaleDateString()}`, margin, yOffset);
         yOffset += 8;
 
-        // Required Exams
-        const examText = college.requiredExams.map(exam => `${exam.exam}: ${exam.score}`).join(', ');
-        doc.text(`Required Exams: ${examText}`, margin, yOffset);
+        // IELTS Score
+        doc.text(`IELTS Score: ${college.ieltsScore}`, margin, yOffset);
         yOffset += 8;
-
-        // Description
-        if (college.description) {
-            const splitDescription = doc.splitTextToSize(`Notes: ${college.description}`, contentWidth);
-            doc.text(splitDescription, margin, yOffset);
-            yOffset += splitDescription.length * 7;
-        }
 
         // Add spacing between colleges
         if (index < colleges.length - 1) {
@@ -111,7 +107,14 @@ export const exportToWord = async (colleges: College[]) => {
                                 new TableCell({
                                     children: [new Paragraph({ text: 'Institution Name' })],
                                     width: {
-                                        size: 25,
+                                        size: 20,
+                                        type: WidthType.PERCENTAGE,
+                                    },
+                                }),
+                                new TableCell({
+                                    children: [new Paragraph({ text: 'Program' })],
+                                    width: {
+                                        size: 20,
                                         type: WidthType.PERCENTAGE,
                                     },
                                 }),
@@ -139,14 +142,14 @@ export const exportToWord = async (colleges: College[]) => {
                                 new TableCell({
                                     children: [new Paragraph({ text: 'Deadline' })],
                                     width: {
-                                        size: 15,
+                                        size: 10,
                                         type: WidthType.PERCENTAGE,
                                     },
                                 }),
                                 new TableCell({
-                                    children: [new Paragraph({ text: 'Required Exams' })],
+                                    children: [new Paragraph({ text: 'IELTS Score' })],
                                     width: {
-                                        size: 20,
+                                        size: 10,
                                         type: WidthType.PERCENTAGE,
                                     },
                                 }),
@@ -155,7 +158,10 @@ export const exportToWord = async (colleges: College[]) => {
                         ...colleges.map((college) => new TableRow({
                             children: [
                                 new TableCell({
-                                    children: [new Paragraph({ text: college.institutionName })],
+                                    children: [new Paragraph({ text: college.name })],
+                                }),
+                                new TableCell({
+                                    children: [new Paragraph({ text: college.program })],
                                 }),
                                 new TableCell({
                                     children: [new Paragraph({ text: `${college.city}, ${college.country}` })],
@@ -164,13 +170,13 @@ export const exportToWord = async (colleges: College[]) => {
                                     children: [new Paragraph({ text: `$${college.tuitionFee.toLocaleString()}` })],
                                 }),
                                 new TableCell({
-                                    children: [new Paragraph({ text: college.numberOfSemesters.toString() })],
+                                    children: [new Paragraph({ text: college.semesters.toString() })],
                                 }),
                                 new TableCell({
                                     children: [new Paragraph({ text: new Date(college.applicationDeadline).toLocaleDateString() })],
                                 }),
                                 new TableCell({
-                                    children: [new Paragraph({ text: college.requiredExams.map(exam => `${exam.exam}: ${exam.score}`).join(', ') })],
+                                    children: [new Paragraph({ text: college.ieltsScore.toString() })],
                                 }),
                             ],
                         })),
