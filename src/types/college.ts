@@ -8,19 +8,19 @@ export interface ExamScore {
 }
 
 export interface College {
-    id: string;
+    id?: string;
     institutionName: string;
     courseName: string;
-    location: {
-        city: string;
-        country: string;
-    };
+    city: string;
+    country: string;
     tuitionFee: number;
     numberOfSemesters: number;
     applicationDeadline: string;
     requiredExams: ExamScore[];
-    description?: string;
     admissionStatus: AdmissionStatus;
+    description: string;
+    email: string;
+    phoneNumber: string;
 }
 
 export type CollegeFormData = Omit<College, 'id'>; 

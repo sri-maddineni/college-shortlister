@@ -7,98 +7,87 @@ interface CollegeCardProps {
     onDelete: (id: string) => void;
 }
 
-const getStatusColor = (status: College['admissionStatus']) => {
-    switch (status) {
-        case 'Need to Apply':
-            return 'bg-yellow-100 text-yellow-800';
-        case 'Applied':
-            return 'bg-blue-100 text-blue-800';
-        case 'Admission Received':
-            return 'bg-green-100 text-green-800';
-        case 'Admission Not Obtained':
-            return 'bg-red-100 text-red-800';
-        default:
-            return 'bg-gray-100 text-gray-800';
-    }
-};
-
 export default function CollegeCard({ college, onEdit, onDelete }: CollegeCardProps) {
     return (
-        <div className="bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-200 transform hover:-translate-y-1">
+        <div className="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-md transition-shadow duration-200">
             <div className="p-6">
                 <div className="flex justify-between items-start">
                     <div>
-                        <h3 className="text-xl font-semibold text-gray-900 hover:text-indigo-600 transition-colors">
-                            {college.institutionName}
-                        </h3>
+                        <h3 className="text-lg font-semibold text-gray-900">{college.institutionName}</h3>
                         <p className="mt-1 text-sm text-gray-500">
-                            {college.courseName}
+                            {college.city}, {college.country}
                         </p>
-                        <p className="mt-1 text-sm text-gray-500">
-                            {college.location.city}, {college.location.country}
-                        </p>
-                        <span className={`mt-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(college.admissionStatus)}`}>
-                            {college.admissionStatus}
-                        </span>
                     </div>
                     <div className="flex space-x-2">
                         <button
                             onClick={() => onEdit(college)}
-                            className="p-2 text-gray-400 hover:text-indigo-600 transition-colors"
-                            aria-label="Edit college"
+                            className="p-1 text-gray-400 hover:text-indigo-600 transition-colors duration-200"
                         >
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
                             </svg>
                         </button>
                         <button
-                            onClick={() => onDelete(college.id)}
-                            className="p-2 text-gray-400 hover:text-red-600 transition-colors"
-                            aria-label="Delete college"
+                            onClick={() => onDelete(college.id!)}
+                            className="p-1 text-gray-400 hover:text-red-600 transition-colors duration-200"
                         >
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
                             </svg>
                         </button>
                     </div>
                 </div>
 
-                <div className="mt-4 grid grid-cols-2 gap-4">
-                    <div>
-                        <p className="text-sm font-medium text-gray-500">Tuition Fee</p>
-                        <p className="mt-1 text-lg font-semibold text-gray-900">${college.tuitionFee.toLocaleString()}</p>
-                    </div>
-                    <div>
-                        <p className="text-sm font-medium text-gray-500">Semesters</p>
-                        <p className="mt-1 text-lg font-semibold text-gray-900">{college.numberOfSemesters}</p>
-                    </div>
-                    <div>
-                        <p className="text-sm font-medium text-gray-500">Application Deadline</p>
-                        <p className="mt-1 text-lg font-semibold text-gray-900">
-                            {format(new Date(college.applicationDeadline), 'd MMMM yyyy')}
-                        </p>
-                    </div>
-                    <div>
-                        <p className="text-sm font-medium text-gray-500">Required Exams</p>
-                        <div className="mt-1 flex flex-wrap gap-2">
-                            {college.requiredExams.map((examScore) => (
-                                <span
-                                    key={examScore.exam}
-                                    className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800"
-                                >
-                                    {examScore.exam}: {examScore.score}
-                                </span>
-                            ))}
+                <div className="mt-4 space-y-2">
+                    <p className="text-sm text-gray-600">
+                        <span className="font-medium">Course:</span> {college.courseName}
+                    </p>
+                    <p className="text-sm text-gray-600">
+                        <span className="font-medium">Tuition Fee:</span> ${college.tuitionFee.toLocaleString()}
+                    </p>
+                    <p className="text-sm text-gray-600">
+                        <span className="font-medium">Semesters:</span> {college.numberOfSemesters}
+                    </p>
+                    <p className="text-sm text-gray-600">
+                        <span className="font-medium">Deadline:</span>{' '}
+                        {format(new Date(college.applicationDeadline), 'MMM d, yyyy')}
+                    </p>
+                    <p className="text-sm text-gray-600">
+                        <span className="font-medium">Status:</span>{' '}
+                        <span
+                            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${college.admissionStatus === 'Admission Received'
+                                ? 'bg-green-100 text-green-800'
+                                : college.admissionStatus === 'Applied'
+                                    ? 'bg-blue-100 text-blue-800'
+                                    : college.admissionStatus === 'Admission Not Obtained'
+                                        ? 'bg-red-100 text-red-800'
+                                        : 'bg-yellow-100 text-yellow-800'
+                                }`}
+                        >
+                            {college.admissionStatus}
+                        </span>
+                    </p>
+                    {college.requiredExams.length > 0 && (
+                        <div className="text-sm text-gray-600">
+                            <span className="font-medium">Required Exams:</span>
+                            <div className="mt-1 flex flex-wrap gap-2">
+                                {college.requiredExams.map((exam) => (
+                                    <span
+                                        key={exam.exam}
+                                        className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800"
+                                    >
+                                        {exam.exam}: {exam.score}
+                                    </span>
+                                ))}
+                            </div>
                         </div>
-                    </div>
+                    )}
+                    {college.description && (
+                        <p className="text-sm text-gray-600 mt-2">
+                            <span className="font-medium">Notes:</span> {college.description}
+                        </p>
+                    )}
                 </div>
-
-                {college.description && (
-                    <div className="mt-4">
-                        <p className="text-sm font-medium text-gray-500">Notes</p>
-                        <p className="mt-1 text-sm text-gray-600">{college.description}</p>
-                    </div>
-                )}
             </div>
         </div>
     );

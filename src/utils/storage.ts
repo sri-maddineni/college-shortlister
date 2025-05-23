@@ -1,35 +1,48 @@
 import { College } from '../types/college';
 
-const STORAGE_KEY = 'colleges';
+interface UserData {
+    email: string;
+    phoneNumber: string;
+    colleges: College[];
+}
+
+const STORAGE_KEY = 'college-shortlister-data';
+
+export const getUserData = (): UserData | null => {
+    const data = localStorage.getItem(STORAGE_KEY);
+    return data ? JSON.parse(data) : null;
+};
+
+export const setUserData = (data: UserData) => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+};
 
 export const getColleges = (): College[] => {
-    if (typeof window === 'undefined') return [];
-    const data = localStorage.getItem(STORAGE_KEY);
-    return data ? JSON.parse(data) : [];
+    const data = getUserData();
+    return data?.colleges || [];
 };
 
-export const saveColleges = (colleges: College[]): void => {
-    if (typeof window === 'undefined') return;
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(colleges));
+export const addCollege = (college: College) => {
+    const data = getUserData() || { email: college.email, phoneNumber: college.phoneNumber, colleges: [] };
+    data.colleges.push(college);
+    setUserData(data);
 };
 
-export const addCollege = (college: College): void => {
-    const colleges = getColleges();
-    colleges.push(college);
-    saveColleges(colleges);
-};
+export const updateCollege = (college: College) => {
+    const data = getUserData();
+    if (!data) return;
 
-export const updateCollege = (updatedCollege: College): void => {
-    const colleges = getColleges();
-    const index = colleges.findIndex((c) => c.id === updatedCollege.id);
+    const index = data.colleges.findIndex((c) => c.id === college.id);
     if (index !== -1) {
-        colleges[index] = updatedCollege;
-        saveColleges(colleges);
+        data.colleges[index] = college;
+        setUserData(data);
     }
 };
 
-export const deleteCollege = (id: string): void => {
-    const colleges = getColleges();
-    const filteredColleges = colleges.filter((c) => c.id !== id);
-    saveColleges(filteredColleges);
+export const deleteCollege = (id: string) => {
+    const data = getUserData();
+    if (!data) return;
+
+    data.colleges = data.colleges.filter((c) => c.id !== id);
+    setUserData(data);
 }; 

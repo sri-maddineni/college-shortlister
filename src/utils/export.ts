@@ -38,7 +38,7 @@ export const exportToPDF = (colleges: College[]) => {
         // Location
         doc.setFontSize(12);
         doc.setFont('helvetica', 'normal');
-        doc.text(`Location: ${college.location.city}, ${college.location.country}`, margin, yOffset);
+        doc.text(`Location: ${college.city}, ${college.country}`, margin, yOffset);
         yOffset += 8;
 
         // Tuition Fee
@@ -158,7 +158,7 @@ export const exportToWord = async (colleges: College[]) => {
                                     children: [new Paragraph({ text: college.institutionName })],
                                 }),
                                 new TableCell({
-                                    children: [new Paragraph({ text: `${college.location.city}, ${college.location.country}` })],
+                                    children: [new Paragraph({ text: `${college.city}, ${college.country}` })],
                                 }),
                                 new TableCell({
                                     children: [new Paragraph({ text: `$${college.tuitionFee.toLocaleString()}` })],

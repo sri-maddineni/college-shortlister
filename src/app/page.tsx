@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { College, CollegeFormData, AdmissionStatus } from '../types/college';
-import { getColleges, addCollege, updateCollege, deleteCollege } from '../utils/storage';
+import { getColleges as getLocalColleges, addCollege as addLocalCollege, updateCollege as updateLocalCollege, deleteCollege as deleteLocalCollege } from '../utils/storage';
+import { getColleges as getFirebaseColleges, addCollege as addFirebaseCollege, updateCollege as updateFirebaseCollege, deleteCollege as deleteFirebaseCollege } from '../utils/firebase';
 import { exportToPDF, exportToWord } from '../utils/export';
 import CollegeForm from '../components/CollegeForm';
 import CollegeCard from '../components/CollegeCard';
@@ -24,22 +25,29 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    setColleges(getColleges());
+    setColleges(getLocalColleges());
     setIsLoading(false);
   }, []);
 
-  const handleSubmit = (data: CollegeFormData) => {
-    if (editingCollege) {
-      const updatedCollege = { ...data, id: editingCollege.id };
-      updateCollege(updatedCollege);
-      setColleges(getColleges());
+  const handleSubmit = async (data: College) => {
+    try {
+      if (editingCollege) {
+        // Update existing college
+        updateLocalCollege(data);
+        await updateFirebaseCollege(data);
+      } else {
+        // Add new college
+        const newCollege = { ...data, id: uuidv4() };
+        addLocalCollege(newCollege);
+        await addFirebaseCollege(newCollege);
+      }
+      setColleges(getLocalColleges());
       setEditingCollege(undefined);
-    } else {
-      const newCollege = { ...data, id: uuidv4() };
-      addCollege(newCollege);
-      setColleges(getColleges());
+      setShowForm(false);
+    } catch (error) {
+      console.error('Error saving college:', error);
+      alert('Failed to save college. Please try again.');
     }
-    setShowForm(false);
   };
 
   const handleEdit = (college: College) => {
@@ -47,10 +55,19 @@ export default function Home() {
     setShowForm(true);
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (window.confirm('Are you sure you want to delete this college?')) {
-      deleteCollege(id);
-      setColleges(getColleges());
+      try {
+        const college = colleges.find(c => c.id === id);
+        if (college) {
+          deleteLocalCollege(id);
+          await deleteFirebaseCollege(college);
+          setColleges(getLocalColleges());
+        }
+      } catch (error) {
+        console.error('Error deleting college:', error);
+        alert('Failed to delete college. Please try again.');
+      }
     }
   };
 
@@ -84,7 +101,7 @@ export default function Home() {
 
   const filteredAndSortedColleges = sortColleges(
     colleges.filter((college) => {
-      const matchesCountry = !selectedCountry || college.location.country === selectedCountry;
+      const matchesCountry = !selectedCountry || college.country === selectedCountry;
       const [minFee, maxFee] = getFeeRangeLimits(feeRange as FeeRange);
       const matchesFeeRange = college.tuitionFee >= minFee && college.tuitionFee <= maxFee;
       const matchesStatus = !selectedStatus || college.admissionStatus === selectedStatus;
@@ -92,7 +109,7 @@ export default function Home() {
     })
   );
 
-  const uniqueCountries = Array.from(new Set(colleges.map(college => college.location.country)));
+  const uniqueCountries = Array.from(new Set(colleges.map(college => college.country)));
 
   const handleExportPDF = () => {
     exportToPDF(filteredAndSortedColleges);
