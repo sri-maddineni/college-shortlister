@@ -9,7 +9,7 @@ interface CollegeFormProps {
 }
 
 const EXAMS: Exam[] = ['IELTS', 'GRE', 'TOEFL', 'Duolingo'];
-const ADMISSION_STATUSES: AdmissionStatus[] = ['Need to Apply', 'Applied', 'Admission Received', 'Admission Not Obtained'];
+const ADMISSION_STATUSES: AdmissionStatus[] = ['Deadline passed', 'To apply', 'Applied', 'Admission Received', 'Admission Not Obtained'];
 
 export default function CollegeForm({ initialData, onSubmit, onCancel }: CollegeFormProps) {
     const userData = getUserData();
@@ -25,7 +25,7 @@ export default function CollegeForm({ initialData, onSubmit, onCancel }: College
         applicationDeadline: '',
         requiredExams: [],
         description: '',
-        admissionStatus: 'Need to Apply',
+        admissionStatus: 'To apply',
         email: userData?.email || '',
         phoneNumber: userData?.phoneNumber || '',
     });

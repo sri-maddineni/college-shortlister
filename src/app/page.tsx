@@ -11,13 +11,14 @@ import CollegeCard from '../components/CollegeCard';
 type SortOption = 'deadline-asc' | 'deadline-desc' | 'fee-asc' | 'fee-desc';
 type FeeRange = '0-10000' | '10000-20000' | '20000-30000' | '30000-40000' | '40000+';
 
-const ADMISSION_STATUSES: AdmissionStatus[] = ['Need to Apply', 'Applied', 'Admission Received', 'Admission Not Obtained'];
+const ADMISSION_STATUSES: AdmissionStatus[] = ['Deadline passed', 'To apply', 'Applied', 'Admission Received', 'Admission Not Obtained'];
 
 export default function Home() {
   const [colleges, setColleges] = useState<College[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [editingCollege, setEditingCollege] = useState<College | undefined>(undefined);
-  const [selectedCountry, setSelectedCountry] = useState<string>('');
+  // const [selectedCountry, setSelectedCountry] = useState<string>('');
+  const [selectedCourse, setSelectedCourse] = useState<string>('');
   const [feeRange, setFeeRange] = useState<FeeRange | ''>('');
   const [sortBy, setSortBy] = useState<SortOption>('deadline-asc');
   const [selectedStatus, setSelectedStatus] = useState<AdmissionStatus | ''>('');
@@ -32,13 +33,12 @@ export default function Home() {
     try {
       if (editingCollege) {
         // Update existing college
-        updateLocalCollege(data);
-       // await updateFirebaseCollege(data);
+        const updatedCollege = { ...data, id: editingCollege.id };
+        updateLocalCollege(updatedCollege);
       } else {
         // Add new college
         const newCollege = { ...data, id: uuidv4() };
         addLocalCollege(newCollege);
-       // await addFirebaseCollege(newCollege);
       }
       setColleges(getLocalColleges());
       setEditingCollege(undefined);
@@ -97,15 +97,18 @@ export default function Home() {
 
   const filteredAndSortedColleges = sortColleges(
     colleges.filter((college) => {
-      const matchesCountry = !selectedCountry || college.location.country === selectedCountry;
+      // const matchesCountry = !selectedCountry || college.location.country === selectedCountry;
       const [minFee, maxFee] = getFeeRangeLimits(feeRange as FeeRange);
       const matchesFeeRange = college.tuitionFee >= minFee && college.tuitionFee <= maxFee;
       const matchesStatus = !selectedStatus || college.admissionStatus === selectedStatus;
-      return matchesCountry && matchesFeeRange && matchesStatus;
+      const matchesCourse = !selectedCourse || college.courseName === selectedCourse;
+      return matchesFeeRange && matchesStatus && matchesCourse; //matchesCountry
     })
   );
 
-  const uniqueCountries = Array.from(new Set(colleges.map(college => college.location.country)));
+  //const uniqueCountries = Array.from(new Set(colleges.map(college => college.location.country)));
+
+  const uniqueCourses = Array.from(new Set(colleges.map(college => college.courseName)));
 
   const handleExportPDF = () => {
     exportToPDF(filteredAndSortedColleges);
@@ -213,7 +216,9 @@ export default function Home() {
         <div className="bg-white rounded-xl shadow-sm p-6 mb-8">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">Filter and Sort Colleges</h2>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <div>
+
+
+            {/* <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Select Country</label>
               <select
                 value={selectedCountry}
@@ -227,7 +232,9 @@ export default function Home() {
                   </option>
                 ))}
               </select>
-            </div>
+            </div> */}
+
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Tuition Fee Range</label>
               <select
@@ -243,6 +250,23 @@ export default function Home() {
                 <option value="40000+">$40,000+</option>
               </select>
             </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Course Name</label>
+              <select
+                value={selectedCourse}
+                onChange={(e) => setSelectedCourse(e.target.value)}
+                className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+              >
+                <option value="">All Courses</option>
+                {uniqueCourses.map((course) => (
+                  <option key={course} value={course}>
+                    {course}
+                  </option>
+                ))}
+              </select>
+            </div>
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Admission Status</label>
               <select

@@ -1,6 +1,6 @@
 export type Exam = 'IELTS' | 'GRE' | 'TOEFL' | 'Duolingo';
 
-export type AdmissionStatus = 'Need to Apply' | 'Applied' | 'Admission Received' | 'Admission Not Obtained';
+export type AdmissionStatus = 'Deadline passed' | 'To apply' | 'Applied' | 'Admission Received' | 'Admission Not Obtained';
 
 export interface ExamScore {
     exam: Exam;

@@ -18,7 +18,7 @@ export default function CollegeCard({ college, onEdit, onDelete }: CollegeCardPr
     const formatCurrency = (amount: number) => {
         return new Intl.NumberFormat('en-US', {
             style: 'currency',
-            currency: 'USD',
+            currency: 'EUR',
             minimumFractionDigits: 0,
             maximumFractionDigits: 0
         }).format(amount);
@@ -32,22 +32,27 @@ export default function CollegeCard({ college, onEdit, onDelete }: CollegeCardPr
                 return 'bg-blue-100 text-blue-800';
             case 'Admission Not Obtained':
                 return 'bg-red-100 text-red-800';
+            case 'Deadline passed':
+                return 'bg-gray-900 text-gray-100';
             default:
-                return 'bg-gray-100 text-gray-800';
+                return 'bg-gray-500 text-white';
         }
     };
 
     return (
-        <div className="bg-white rounded-lg shadow-md p-6 space-y-4">
-            <div className="flex justify-between items-start">
+        <div className="bg-white rounded-lg shadow-md p-5 space-y-4">
+            
                 <div>
-                    <h3 className="text-lg font-semibold text-gray-900">{college.institutionName}</h3>
-                    <p className="text-sm text-gray-600">{college.courseName}</p>
+                    <h3 className="text-lg py-2 font-semibold text-gray-900">{college.institutionName}</h3>
+                    <div className="flex justify-between items-stretch">
+                        <p className="text-sm text-gray-600">{college.courseName}</p>
+                        <span className={`px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(college.admissionStatus)}`}>
+                            {college.admissionStatus}
+                        </span>
+                    </div>
                 </div>
-                <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(college.admissionStatus)}`}>
-                    {college.admissionStatus}
-                </span>
-            </div>
+
+            
 
             <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
