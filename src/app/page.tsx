@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { College, AdmissionStatus } from '../types/college';
 import { getColleges as getLocalColleges, addCollege as addLocalCollege, updateCollege as updateLocalCollege, deleteCollege as deleteLocalCollege } from '../utils/storage';
-import { addCollege as addFirebaseCollege, updateCollege as updateFirebaseCollege, deleteCollege as deleteFirebaseCollege } from '../utils/firebase';
 import { exportToPDF, exportToWord } from '../utils/export';
 import CollegeForm from '../components/CollegeForm';
 import CollegeCard from '../components/CollegeCard';
@@ -34,12 +33,12 @@ export default function Home() {
       if (editingCollege) {
         // Update existing college
         updateLocalCollege(data);
-        await updateFirebaseCollege(data);
+       // await updateFirebaseCollege(data);
       } else {
         // Add new college
         const newCollege = { ...data, id: uuidv4() };
         addLocalCollege(newCollege);
-        await addFirebaseCollege(newCollege);
+       // await addFirebaseCollege(newCollege);
       }
       setColleges(getLocalColleges());
       setEditingCollege(undefined);
@@ -59,7 +58,7 @@ export default function Home() {
     if (window.confirm('Are you sure you want to delete this college?')) {
       try {
         deleteLocalCollege(college.id!);
-        await deleteFirebaseCollege(college);
+        //await deleteFirebaseCollege(college);
         setColleges(getLocalColleges());
       } catch (error) {
         console.error('Error deleting college:', error);
