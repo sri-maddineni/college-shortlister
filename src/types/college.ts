@@ -9,15 +9,18 @@ export interface ExamScore {
 
 export interface College {
     id?: string;
-    name: string;
-    country: string;
-    city: string;
-    program: string;
-    semesters: number;
+    institutionName: string;
+    courseName: string;
+    location: {
+        city: string;
+        country: string;
+    };
     tuitionFee: number;
+    numberOfSemesters: number;
     applicationDeadline: string;
+    requiredExams: ExamScore[];
+    description: string;
     admissionStatus: AdmissionStatus;
-    ieltsScore: number;
     email: string;
     phoneNumber: string;
 }

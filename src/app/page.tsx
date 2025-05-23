@@ -98,7 +98,7 @@ export default function Home() {
 
   const filteredAndSortedColleges = sortColleges(
     colleges.filter((college) => {
-      const matchesCountry = !selectedCountry || college.country === selectedCountry;
+      const matchesCountry = !selectedCountry || college.location.country === selectedCountry;
       const [minFee, maxFee] = getFeeRangeLimits(feeRange as FeeRange);
       const matchesFeeRange = college.tuitionFee >= minFee && college.tuitionFee <= maxFee;
       const matchesStatus = !selectedStatus || college.admissionStatus === selectedStatus;
@@ -106,7 +106,7 @@ export default function Home() {
     })
   );
 
-  const uniqueCountries = Array.from(new Set(colleges.map(college => college.country)));
+  const uniqueCountries = Array.from(new Set(colleges.map(college => college.location.country)));
 
   const handleExportPDF = () => {
     exportToPDF(filteredAndSortedColleges);
