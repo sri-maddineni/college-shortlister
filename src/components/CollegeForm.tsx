@@ -27,7 +27,7 @@ export default function CollegeForm({ initialData, onSubmit, onCancel }: College
         city: '',
         country: '',
         tuitionFee: 0,
-        numberOfSemesters: 2,
+        numberOfSemesters: 4,
         applicationDeadline: '',
         requiredExams: [],
         description: '',
