@@ -128,6 +128,53 @@ export default function Home() {
             </div>
             <div className="flex flex-wrap gap-3">
               <button
+                onClick={() => {
+                  const colleges = getLocalColleges();
+                  navigator.clipboard.writeText(JSON.stringify(colleges, null, 2));
+                  alert('Colleges data copied to clipboard!');
+                }}
+                className="px-4 py-2 bg-white text-indigo-600 rounded-lg hover:bg-indigo-50 transition-colors duration-200 flex items-center gap-2 shadow-sm"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                  <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
+                  <path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" />
+                </svg>
+                Copy JSON
+              </button>
+              <button
+                onClick={() => {
+                  const json = prompt('Paste your colleges JSON data:');
+                  if (json) {
+                    try {
+                      const colleges = JSON.parse(json);
+                      if (Array.isArray(colleges)) {
+                        // Clear existing colleges and add new ones
+                        colleges.forEach(college => {
+                          if (!college.id) {
+                            college.id = uuidv4();
+                          }
+                          addLocalCollege(college);
+                        });
+                        setColleges(getLocalColleges());
+                        alert('Colleges data imported successfully!');
+                      } else {
+                        alert('Invalid JSON format. Expected an array of colleges.');
+                      }
+                    } catch (error) {
+                      alert('Invalid JSON data. Please check the format.');
+                      console.error('Invalid JSON data:', error);
+                    }
+                  }
+                }}
+                className="px-4 py-2 bg-white text-indigo-600 rounded-lg hover:bg-indigo-50 transition-colors duration-200 flex items-center gap-2 shadow-sm"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                  <path d="M8 2a1 1 0 000 2h2a1 1 0 100-2H8z" />
+                  <path d="M3 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v5h-4.586l1.293-1.293a1 1 0 10-1.414 1.414l-3 3a1 1 0 000 1.414l3 3a1 1 0 001.414-1.414L10.414 13H15v3a2 2 0 01-2 2H5a2 2 0 01-2-2V5zM15 11h2a1 1 0 110 2h-2v-2z" />
+                </svg>
+                Paste JSON
+              </button>
+              <button
                 onClick={handleExportPDF}
                 className="px-4 py-2 bg-white text-indigo-600 rounded-lg hover:bg-indigo-50 transition-colors duration-200 flex items-center gap-2 shadow-sm"
               >
