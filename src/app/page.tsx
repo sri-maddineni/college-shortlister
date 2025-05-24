@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { College, AdmissionStatus } from '../types/college';
-import { getColleges as getLocalColleges, addCollege as addLocalCollege, updateCollege as updateLocalCollege, deleteCollege as deleteLocalCollege } from '../utils/storage';
+import { getColleges as getLocalColleges, addCollege as addLocalCollege, updateCollege as updateLocalCollege, deleteCollege as deleteLocalCollege, getUserData, setUserData } from '../utils/storage';
 import { exportToPDF, exportToWord } from '../utils/export';
 import CollegeForm from '../components/CollegeForm';
 import CollegeCard from '../components/CollegeCard';
@@ -176,12 +176,13 @@ export default function Home() {
                 </svg>
                 Paste JSON
               </button>
+              
               <button
                 onClick={handleExportPDF}
                 className="px-4 py-2 bg-white text-indigo-600 rounded-lg hover:bg-indigo-50 transition-colors duration-200 flex items-center gap-2 shadow-sm"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M6 2a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2V7.414A2 2 0 0015.414 6L12 2.586A2 2 0 0010.586 2H6zm5 6a1 1 0 10-2 0v3.586l-1.293-1.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 11.586V8z" clipRule="evenodd" />
+                  <path fillRule="evenodd" d="M6 2a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clipRule="evenodd" />
                 </svg>
                 Export PDF
               </button>
@@ -204,7 +205,25 @@ export default function Home() {
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                   <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
                 </svg>
-                Add College
+                Add New
+              </button>
+              <button
+                onClick={() => {
+                  if (window.confirm('Are you sure you want to delete all colleges? This action cannot be undone.')) {
+                    const data = getUserData();
+                    if (data) {
+                      data.colleges = [];
+                      setUserData(data);
+                      setColleges([]);
+                    }
+                  }
+                }}
+                className="px-4 py-2 bg-white text-red-600 rounded-lg hover:bg-red-50 transition-colors duration-200 flex items-center gap-2 shadow-sm"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
+                </svg>
+                
               </button>
             </div>
           </div>

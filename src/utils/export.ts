@@ -116,6 +116,31 @@ export const exportToPDF = (colleges: College[]) => {
         }
     });
 
+    // Add JSON representation at the end
+    doc.addPage();
+    yOffset = margin;
+
+    // JSON Title
+    doc.setFontSize(16);
+    doc.setFont('helvetica', 'bold');
+    doc.text('JSON Representation', margin, yOffset);
+    yOffset += 15;
+
+    // JSON Content
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    const jsonString = JSON.stringify(colleges, null, 2);
+    const jsonLines = doc.splitTextToSize(jsonString, doc.internal.pageSize.getWidth() - (2 * margin));
+
+    jsonLines.forEach((line: string) => {
+        if (yOffset > pageHeight - margin) {
+            doc.addPage();
+            yOffset = margin;
+        }
+        doc.text(line, margin, yOffset);
+        yOffset += 6;
+    });
+
     doc.save('colleges.pdf');
 };
 
@@ -123,11 +148,112 @@ export const exportToWord = async (colleges: College[]) => {
     const doc = new Document({
         sections: [{
             properties: {},
-            children: colleges.map(college => [
+            children: [
+                // College details
+                ...colleges.map(college => [
+                    new Paragraph({
+                        children: [
+                            new TextRun({
+                                text: college.institutionName,
+                                bold: true,
+                                size: 32
+                            })
+                        ]
+                    }),
+                    new Paragraph({
+                        children: [
+                            new TextRun({
+                                text: `Program: ${college.courseName}`,
+                                size: 24
+                            })
+                        ]
+                    }),
+                    new Paragraph({
+                        children: [
+                            new TextRun({
+                                text: `Location: ${college.location.city}, ${college.location.country}`,
+                                size: 24
+                            })
+                        ]
+                    }),
+                    new Table({
+                        rows: [
+                            new TableRow({
+                                children: [
+                                    new TableCell({
+                                        children: [new Paragraph('Duration')],
+                                        width: { size: 30, type: 'pct' }
+                                    }),
+                                    new TableCell({
+                                        children: [new Paragraph(`${college.numberOfSemesters} semesters`)],
+                                        width: { size: 70, type: 'pct' }
+                                    })
+                                ]
+                            }),
+                            new TableRow({
+                                children: [
+                                    new TableCell({
+                                        children: [new Paragraph('Tuition Fee')],
+                                        width: { size: 30, type: 'pct' }
+                                    }),
+                                    new TableCell({
+                                        children: [new Paragraph(`$${college.tuitionFee.toLocaleString()}`)],
+                                        width: { size: 70, type: 'pct' }
+                                    })
+                                ]
+                            }),
+                            new TableRow({
+                                children: [
+                                    new TableCell({
+                                        children: [new Paragraph('Application Deadline')],
+                                        width: { size: 30, type: 'pct' }
+                                    }),
+                                    new TableCell({
+                                        children: [new Paragraph(new Date(college.applicationDeadline).toLocaleDateString())],
+                                        width: { size: 70, type: 'pct' }
+                                    })
+                                ]
+                            }),
+                            new TableRow({
+                                children: [
+                                    new TableCell({
+                                        children: [new Paragraph('Admission Status')],
+                                        width: { size: 30, type: 'pct' }
+                                    }),
+                                    new TableCell({
+                                        children: [new Paragraph(college.admissionStatus)],
+                                        width: { size: 70, type: 'pct' }
+                                    })
+                                ]
+                            }),
+                            new TableRow({
+                                children: [
+                                    new TableCell({
+                                        children: [new Paragraph('Required Exams')],
+                                        width: { size: 30, type: 'pct' }
+                                    }),
+                                    new TableCell({
+                                        children: [
+                                            new Paragraph(
+                                                college.requiredExams
+                                                    .map(exam => `${exam.exam}: ${exam.score}`)
+                                                    .join('\n')
+                                            )
+                                        ],
+                                        width: { size: 70, type: 'pct' }
+                                    })
+                                ]
+                            })
+                        ]
+                    }),
+                    new Paragraph({ text: '' })
+                ]).flat(),
+
+                // JSON Representation
                 new Paragraph({
                     children: [
                         new TextRun({
-                            text: college.institutionName,
+                            text: 'JSON Representation',
                             bold: true,
                             size: 32
                         })
@@ -136,91 +262,12 @@ export const exportToWord = async (colleges: College[]) => {
                 new Paragraph({
                     children: [
                         new TextRun({
-                            text: `Program: ${college.courseName}`,
+                            text: JSON.stringify(colleges, null, 2),
                             size: 24
                         })
                     ]
-                }),
-                new Paragraph({
-                    children: [
-                        new TextRun({
-                            text: `Location: ${college.location.city}, ${college.location.country}`,
-                            size: 24
-                        })
-                    ]
-                }),
-                new Table({
-                    rows: [
-                        new TableRow({
-                            children: [
-                                new TableCell({
-                                    children: [new Paragraph('Duration')],
-                                    width: { size: 30, type: 'pct' }
-                                }),
-                                new TableCell({
-                                    children: [new Paragraph(`${college.numberOfSemesters} semesters`)],
-                                    width: { size: 70, type: 'pct' }
-                                })
-                            ]
-                        }),
-                        new TableRow({
-                            children: [
-                                new TableCell({
-                                    children: [new Paragraph('Tuition Fee')],
-                                    width: { size: 30, type: 'pct' }
-                                }),
-                                new TableCell({
-                                    children: [new Paragraph(`$${college.tuitionFee.toLocaleString()}`)],
-                                    width: { size: 70, type: 'pct' }
-                                })
-                            ]
-                        }),
-                        new TableRow({
-                            children: [
-                                new TableCell({
-                                    children: [new Paragraph('Application Deadline')],
-                                    width: { size: 30, type: 'pct' }
-                                }),
-                                new TableCell({
-                                    children: [new Paragraph(new Date(college.applicationDeadline).toLocaleDateString())],
-                                    width: { size: 70, type: 'pct' }
-                                })
-                            ]
-                        }),
-                        new TableRow({
-                            children: [
-                                new TableCell({
-                                    children: [new Paragraph('Admission Status')],
-                                    width: { size: 30, type: 'pct' }
-                                }),
-                                new TableCell({
-                                    children: [new Paragraph(college.admissionStatus)],
-                                    width: { size: 70, type: 'pct' }
-                                })
-                            ]
-                        }),
-                        new TableRow({
-                            children: [
-                                new TableCell({
-                                    children: [new Paragraph('Required Exams')],
-                                    width: { size: 30, type: 'pct' }
-                                }),
-                                new TableCell({
-                                    children: [
-                                        new Paragraph(
-                                            college.requiredExams
-                                                .map(exam => `${exam.exam}: ${exam.score}`)
-                                                .join('\n')
-                                        )
-                                    ],
-                                    width: { size: 70, type: 'pct' }
-                                })
-                            ]
-                        })
-                    ]
-                }),
-                new Paragraph({ text: '' })
-            ]).flat()
+                })
+            ]
         }]
     });
 
