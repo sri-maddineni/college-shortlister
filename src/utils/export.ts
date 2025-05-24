@@ -6,6 +6,7 @@ import { jsPDF } from 'jspdf';
 export const exportToPDF = (colleges: College[]) => {
     const doc = new jsPDF();
     const margin = 20;
+    const pageHeight = doc.internal.pageSize.getHeight();
     let yOffset = margin;
 
     // Title
@@ -22,7 +23,8 @@ export const exportToPDF = (colleges: College[]) => {
 
     // Colleges
     colleges.forEach((college, index) => {
-        if (yOffset > doc.internal.pageSize.getHeight() - margin) {
+        // Check if we need a new page before starting a new college
+        if (yOffset > pageHeight - margin) {
             doc.addPage();
             yOffset = margin;
         }
@@ -63,16 +65,54 @@ export const exportToPDF = (colleges: College[]) => {
         doc.text('Required Exams:', margin, yOffset);
         yOffset += 8;
 
+        // Check if we need a new page before adding exams
+        if (yOffset + (college.requiredExams.length * 8) > pageHeight - margin) {
+            doc.addPage();
+            yOffset = margin;
+        }
+
         college.requiredExams.forEach(exam => {
             doc.text(`${exam.exam}: ${exam.score}`, margin, yOffset);
             yOffset += 8;
         });
 
+        // Description if exists
+        if (college.description) {
+            // Check if we need a new page before adding description
+            if (yOffset + 16 > pageHeight - margin) {
+                doc.addPage();
+                yOffset = margin;
+            }
+
+            doc.text('Description:', margin, yOffset);
+            yOffset += 8;
+
+            // Split description into lines that fit the page width
+            const splitText = doc.splitTextToSize(college.description, doc.internal.pageSize.getWidth() - (2 * margin));
+
+            // Check if we need a new page for the description
+            if (yOffset + (splitText.length * 8) > pageHeight - margin) {
+                doc.addPage();
+                yOffset = margin;
+            }
+
+            splitText.forEach((line: string) => {
+                doc.text(line, margin, yOffset);
+                yOffset += 8;
+            });
+        }
+
         // Add spacing between colleges
         if (index < colleges.length - 1) {
-            doc.setDrawColor(200);
-            doc.line(margin, yOffset, margin + 190, yOffset);
-            yOffset += 10;
+            // Check if we need a new page before adding the divider
+            if (yOffset + 10 > pageHeight - margin) {
+                doc.addPage();
+                yOffset = margin;
+            } else {
+                doc.setDrawColor(200);
+                doc.line(margin, yOffset, margin + 190, yOffset);
+                yOffset += 10;
+            }
         }
     });
 
