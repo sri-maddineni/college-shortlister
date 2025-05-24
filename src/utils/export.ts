@@ -18,7 +18,7 @@ export const exportToPDF = (colleges: College[]) => {
     // Date
     doc.setFontSize(12);
     doc.setFont('helvetica', 'normal');
-    doc.text(`Generated on: ${new Date().toLocaleDateString()}`, margin, yOffset);
+    doc.text(`Generated on: ${new Date().toLocaleString()}`, margin, yOffset);
     yOffset += 20;
 
     // Colleges
